@@ -1,0 +1,301 @@
+===========
+JOINT ORDER
+===========
+
+1) MODELS WITH 42 DOFS
+   ===================
+   
+   * From joint_state_publisher (e.g. only used to determine configurations
+     using rviz sliders):
+
+     HeadYaw, HeadPitch, 
+     LHipYawPitch, LHipRoll, LHipPitch, LKneePitch, LAnklePitch, LAnkleRoll, 
+     RHipYawPitch, RHipRoll, RHipPitch, RKneePitch, RAnklePitch, RAnkleRoll, 
+     LShoulderPitch, LShoulderRoll, LElbowYaw, LElbowRoll, LWristYaw, LHand, 
+     RShoulderPitch, RShoulderRoll, RElbowYaw, RElbowRoll, RWristYaw, RHand, 
+     RFinger13, RFinger12, LFinger21, LFinger13, LFinger11, 
+     RFinger22, LFinger22, RFinger21, LFinger12, RFinger23, 
+     RFinger11, LFinger23, LThumb1, RThumb1, RThumb2, LThumb2
+
+   * RBDL model parsed from URDF (for C++ IK solver):
+
+     HeadYaw, HeadPitch
+     LHipYawPitch, LHipRoll, LHipPitch, LKneePitch, LAnklePitch, LAnkleRoll
+     LShoulderPitch, LShoulderRoll, LElbowYaw, LElbowRoll, LWristYaw, 
+     LFinger11, LFinger12, LFinger13, LFinger21, LFinger22, LFinger23,
+     LHand, LThumb1, LThumb2
+     RHipYawPitch, RHipRoll, RHipPitch, RKneePitch, RAnklePitch, RAnkleRoll
+     RShoulderPitch, RShoulderRoll, RElbowYaw, RElbowRoll, RWristYaw
+     RFinger11, RFinger12, RFinger13, RFinger21, RFinger22, RFinger23, 
+     RHand, RThumb1, RThumb2
+
+2) MODELS WITH 26 DOFS
+   ===================
+
+   * Robot joint sensor message (Naoqi bridge): /joint_states:
+
+     HeadYaw, HeadPitch,
+     LShoulderPitch, LShoulderRoll, LElbowYaw, LElbowRoll, LWristYaw, LHand
+     LHipYawPitch, LHipRoll, LHipPitch, LKneePitch, LAnklePitch, LAnkleRoll,
+     RHipYawPitch, RHipRoll, RHipPitch, RKneePitch, RAnklePitch, RAnkleRoll,
+     RShoulderPitch, RShoulderRoll, RElbowYaw, RElbowRoll, RWristYaw, RHand
+
+   * Robot joints in RBDL model removing the fingers (reduced):
+
+     HeadYaw, HeadPitch, 
+     LHipYawPitch, LHipRoll, LHipPitch, LKneePitch, LAnklePitch, LAnkleRoll, 
+     LShoulderPitch, LShoulderRoll, LElbowYaw, LElbowRoll, LWristYaw, LHand, 
+     RHipYawPitch, RHipRoll, RHipPitch, RKneePitch, RAnklePitch, RAnkleRoll, 
+     RShoulderPitch, RShoulderRoll, RElbowYaw, RElbowRoll, RWristYaw, RHand
+
+
+Initial configurations
+======================
+
+   * Initial configuration with both arms down (joints ordered as in
+     joint_state_publisher):
+
+     0.0, 0.0,
+     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+     1.15,  0.10, -1.4, -0.79, 0.0, 0.0,
+     1.15, -0.10,  1.4,  0.79, 0.0, 0.0,
+     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+
+MAPS
+====
+
+  * Table 1: Relation between the sensed joints (using naoqi_bridge) and the
+    joints found in the IK controller (parsed RBDL with 42 dofs)
+
+
+      Joint Names     RBDL Full     Joint sensor (joint_states)
+      -----------     -----------   ------------
+      HeadYaw            0              0
+      HeadPitch          1              1
+      LShoulderPitch     8              2
+      LShoulderRoll      9              3
+      LElbowYaw          10             4
+      LElbowRoll         11             5
+      LWristYaw          12             6
+      LHand              19             7
+      LHipYawPitch       2              8
+      LHipRoll           3              9
+      LHipPitch          4              10
+      LKneePitch         5              11
+      LAnklePitch        6              12
+      LAnkleRoll         7              13
+      RHipYawPitch       22             14
+      RHipRoll           23             15
+      RHipPitch          24             16
+      RKneePitch         25             17
+      RAnklePitch        26             18
+      RAnkleRoll         27             19
+      RShoulderPitch     28             20
+      RShoulderRoll      29             21
+      RElbowYaw          30             22
+      RElbowRoll         31             23
+      RWristYaw          32             24
+      RHand              39             25
+      LFinger11          13             -
+      LFinger12          14             -
+      LFinger13          15             -
+      LFinger21          16             -
+      LFinger22          17             -
+      LFinger23          18             -
+      LThumb1            20             -
+      LThumb2            21             -
+      RFinger11          33             -
+      RFinger12          34             -
+      RFinger13          35             -
+      RFinger21          36             -
+      RFinger22          37             -
+      RFinger23          38             -
+      RThumb1            40             -
+      RThumb2            41             -
+
+  * Table 2: Relation between the full RBDL parsed model (42 dofs) and the
+    reduced RBDL model (after removing the 16 finger dofs)
+
+
+      Joint Names     RBDL full      RBDL reduced
+      -----------     ------------   ------------
+      HeadYaw            0              0
+      HeadPitch          1              1
+      LHipYawPitch       2              2
+      LHipRoll           3              3
+      LHipPitch          4              4
+      LKneePitch         5              5
+      LAnklePitch        6              6
+      LAnkleRoll         7              7
+      LShoulderPitch     8              8
+      LShoulderRoll      9              9
+      LElbowYaw          10             10
+      LElbowRoll         11             11
+      LWristYaw          12             12
+      LFinger11          13             -
+      LFinger12          14             -
+      LFinger13          15             -
+      LFinger21          16             -
+      LFinger22          17             -
+      LFinger23          18             -
+      LHand              19             13
+      LThumb1            20             -
+      LThumb2            21             -
+      RHipYawPitch       22             14
+      RHipRoll           23             15
+      RHipPitch          24             16
+      RKneePitch         25             17
+      RAnklePitch        26             18
+      RAnkleRoll         27             19
+      RShoulderPitch     28             20
+      RShoulderRoll      29             21
+      RElbowYaw          30             22
+      RElbowRoll         31             23
+      RWristYaw          32             24
+      RFinger11          33             -
+      RFinger12          34             -
+      RFinger13          35             -
+      RFinger21          36             -
+      RFinger22          37             -
+      RFinger23          38             -
+      RHand              39             25
+      RThumb1            40             -
+      RThumb2            41             -
+
+
+
+Robot Bodies
+============
+
+The body IDs and their names (using the function print_body_names) in the RBDL
+model are:
+
+ 0  ROOT
+ 1  Neck
+ 2  Head
+ 3  LPelvis
+ 4  LHip
+ 5  LThigh
+ 6  LTibia
+ 7  LAnklePitch
+ 8  l_ankle
+ 9  LShoulder
+10  LBicep
+11  LElbow
+12  LForeArm
+13  l_wrist
+14  LFinger11_link
+15  LFinger12_link
+16  LFinger13_link
+17  LFinger21_link
+18  LFinger22_link
+19  LFinger23_link
+20  l_gripper
+21  LThumb1_link
+22  LThumb2_link
+23  RPelvis
+24  RHip
+25  RThigh
+26  RTibia
+27  RAnklePitch
+28  r_ankle
+29  RShoulder
+30  RBicep
+31  RElbow
+32  RForeArm
+33  r_wrist
+34  RFinger11_link
+35  RFinger12_link
+36  RFinger13_link
+37  RFinger21_link
+38  RFinger22_link
+39  RFinger23_link
+40  r_gripper
+41  RThumb1_link
+42  RThumb2_link
+
+
+OTHER LESS USEFUL TABLES 
+========================
+
+* Relation between "sensed joint states" (from naoqi_bridge) and the joint
+  angles in the reduced RBDL model (when removing the fingers)
+
+    Joint Names     RBDL reduced   Sensed joints
+    -----------     ------------   ------------
+    HeadYaw            0              0
+    HeadPitch          1              1
+    LHipYawPitch       2              8
+    LHipRoll           3              9
+    LHipPitch          4              10
+    LKneePitch         5              11
+    LAnklePitch        6              12
+    LAnkleRoll         7              13
+    LShoulderPitch     8              2
+    LShoulderRoll      9              3
+    LElbowYaw          10             4
+    LElbowRoll         11             5
+    LWristYaw          12             6
+    LHand              13             7
+    RHipYawPitch       14             14
+    RHipRoll           15             15
+    RHipPitch          16             16
+    RKneePitch         17             17
+    RAnklePitch        18             18
+    RAnkleRoll         19             19
+    RShoulderPitch     20             20
+    RShoulderRoll      21             21
+    RElbowYaw          22             22
+    RElbowRoll         23             23
+    RWristYaw          24             24
+    RHand              25             25
+
+* Same as Table 1 but ordered according to RBDL full model joint numbers
+
+    joint names     joint angles   joint states
+    -----------     ------------   ------------
+    HeadYaw            0              0
+    HeadPitch          1              1
+    LHipYawPitch       2              8
+    LHipRoll           3              9
+    LHipPitch          4              10
+    LKneePitch         5              11
+    LAnklePitch        6              12
+    LAnkleRoll         7              13
+    LShoulderPitch     8              2
+    LShoulderRoll      9              3
+    LElbowYaw          10             4
+    LElbowRoll         11             5
+    LWristYaw          12             6
+    LFinger11          13             -
+    LFinger12          14             -
+    LFinger13          15             -
+    LFinger21          16             -
+    LFinger22          17             -
+    LFinger23          18             -
+    LHand              19             7
+    LThumb1            20             -
+    LThumb2            21             -
+    RHipYawPitch       22             14
+    RHipRoll           23             15
+    RHipPitch          24             16
+    RKneePitch         25             17
+    RAnklePitch        26             18
+    RAnkleRoll         27             19
+    RShoulderPitch     28             20
+    RShoulderRoll      29             21
+    RElbowYaw          30             22
+    RElbowRoll         31             23
+    RWristYaw          32             24
+    RFinger11          33             -
+    RFinger12          34             -
+    RFinger13          35             -
+    RFinger21          36             -
+    RFinger22          37             -
+    RFinger23          38             -
+    RHand              39             25
+    RThumb1            40             -
+    RThumb2            41             -

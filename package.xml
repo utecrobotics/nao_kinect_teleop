@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>nao_kinect_teleop</name>
+  <version>0.0.1</version>
+  <description> 
+    Package to move the NAO robot in 3D through the motion of a person acquired
+    with the Microsoft Kinect
+  </description>
+  <maintainer email="jose.avalos@utec.edu.pe">Jose Avalos</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+
+</package>

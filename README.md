@@ -18,6 +18,7 @@ which have to be available in your machine.
     - Eigen (>=3.2)
   - ROS Packages:
     - osik_control (https://github.com/utecrobotics/osik-control)
+    - kinect_msgs (https://github.com/utecrobotics/kinect_msgs)
     - rosserial (https://github.com/ros-drivers/rosserial)
     - nao ROS Support (For details, see http://wiki.ros.org/nao)
   - Other Software:

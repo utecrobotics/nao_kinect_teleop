@@ -1,0 +1,6 @@
+The file kinect_acquisition.cpp is an example of the code that runs in the
+windwos host.
+
+However, it uses headers that have been obtained using rosserial. For more
+details about how to make the connection between Windows and ROS in Linux
+please refer to https://github.com/ros-drivers/rosserial

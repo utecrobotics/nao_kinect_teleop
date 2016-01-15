@@ -1,3 +1,21 @@
+/*                                                                               
+ * Copyright 2016
+ * J.Avalos, S.Cortez 
+ * Universidad de Ingenieria y Tecnologia - UTEC
+ *
+ * This file is part of nao_kinect_teleop.
+ * nao_kinect_teleop is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ * nao_kinect_teleop is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details. You should
+ * have received a copy of the GNU Lesser General Public License along
+ * with nao_kinect_teleop. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "header.h"
 #include <string>
 #include <stdio.h>

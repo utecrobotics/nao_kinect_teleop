@@ -1,6 +1,6 @@
-/*                                                                               
+/*
  * Copyright 2016
- * J.Avalos, S.Cortez, O.Ramos. 
+ * J.Avalos, S.Cortez, O.Ramos.
  * Universidad de Ingenieria y Tecnologia - UTEC
  *
  * This file is part of nao_kinect_teleop.

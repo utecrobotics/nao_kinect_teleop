@@ -1,6 +1,6 @@
-/*                                                                               
+/*
  * Copyright 2016
- * J.Avalos, S.Cortez, O.Ramos. 
+ * J.Avalos, S.Cortez, O.Ramos.
  * Universidad de Ingenieria y Tecnologia - UTEC
  *
  * This file is part of nao_kinect_teleop.
@@ -22,19 +22,22 @@
   -----------------------------------------
 */
 
+#include <cmath>
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <sensor_msgs/JointState.h>
 #include <naoqi_bridge_msgs/JointAnglesWithSpeed.h>
+
 #include <robot-model/robot-model.hpp>
 #include <osik-control/math-tools.hpp>
 #include <osik-control/kine-task.hpp>
 #include <osik-control/kine-task-pose.hpp>
 #include <osik-control/kine-solver-WQP.hpp>
+
 #include <nao_kinect_teleop/robotSpecifics.h>
 #include <nao_kinect_teleop/tools.hpp>
 #include <kinect_msgs/BodyArray.h>
-#include <cmath>
+
 
 using namespace osik;
 
@@ -115,7 +118,7 @@ int main(int argc, char **argv)
   {
     if (niter++ == max_iter)
     {
-      std::cerr << "Initial sensed joint configuration does not have " 
+      std::cerr << "Initial sensed joint configuration does not have "
                 << ndof_red << "degrees of freedom, stopping ..." << std::endl;
       exit(0);
     }
@@ -138,7 +141,7 @@ int main(int argc, char **argv)
 
   // Initialize names of command joints
   for (unsigned int i=0; i<ndof_full; ++i)
-  { 
+  {
     if (ridx[i] != 100)
      jcmd.joint_names[ridx[i]] = jnames[i];
   }
@@ -153,7 +156,7 @@ int main(int argc, char **argv)
   KineSolverWQP solver(robot, qsensed, dt);
   solver.setJointLimits(qmin, qmax, dqmax);
 
- 
+
   //KineTask* taskrh = new KineTaskPose(robot, RGRIPPER, "position");
   KineTask* taskrh = new KineTaskPose(robot, RGRIPPER, "position");
   taskrh->setGain(300.0);
@@ -168,7 +171,7 @@ int main(int argc, char **argv)
   Eigen::VectorXd P_right_elbow;
   Eigen::VectorXd P_left_wrist;
   Eigen::VectorXd P_left_elbow;
-  
+
   solver.pushTask(taskrh);
   solver.pushTask(tasklh);
   solver.pushTask(taskre);
@@ -188,10 +191,10 @@ int main(int argc, char **argv)
       //Datos del Nao
       double L1 = 0.108; //Del hombro al codo
       double L2 = 0.111; //Del codo a la mano
-      
+
       //Recepcion del brazo derecho
       for (unsigned k=0;k<(P.size()/2);k++)
-      {    
+      {
         P[k].resize(3);
         //A partir de eso P[0][k]=(0,0,0)
         P[k][0] = (-kpoints.getPoints()->body[k].z)-(-kpoints.getPoints()->body[0].z);
@@ -228,12 +231,12 @@ int main(int argc, char **argv)
 
       // Recepcion del brazo izquierdo
       for (unsigned k=(P.size()/2);k<P.size();k++)
-      {    
+      {
 	P[k].resize(3);
 	P[k][0] = (-kpoints.getPoints()->body[k].z)-(-kpoints.getPoints()->body[3].z);
 	P[k][1] = (-kpoints.getPoints()->body[k].x)-(-kpoints.getPoints()->body[3].x);
 	P[k][2] = (kpoints.getPoints()->body[k].y)-(kpoints.getPoints()->body[3].y);
-      } 
+      }
       //Hallamos el modulo M1 de P4
       double M3 = sqrt(pow(P[4][0], 2.0) + pow(P[4][1], 2.0) + pow(P[4][2], 2.0));
       //Hallamos el modulo M2 de (P2-P1)
@@ -263,32 +266,32 @@ int main(int argc, char **argv)
       P_left_wrist.resize(3);
       P_right_elbow.resize(3);
       P_left_elbow.resize(3);
-      
+
       //Elbow Izquierdo
       P_left_elbow[0] = P[1][0];
       P_left_elbow[1] = P[1][1];
       P_left_elbow[2] = P[1][2];
-        
+
       //Left hand
       P_left_wrist[0] = P[2][0];
       P_left_wrist[1] = P[2][1];
       P_left_wrist[2] = P[2][2];
-        
+
       //Right elbow
       P_right_elbow[0] = P[4][0];
       P_right_elbow[1] = P[4][1];
       P_right_elbow[2] = P[4][2];
-        
+
       //Right hand
       P_right_wrist[0] = P[5][0];
       P_right_wrist[1] = P[5][1];
       P_right_wrist[2] = P[5][2];
-        
+
       taskle->setDesiredValue(P_left_elbow);
       tasklh->setDesiredValue(P_left_wrist);
       taskre->setDesiredValue(P_right_elbow);
       taskrh->setDesiredValue(P_right_wrist);
-    
+
       solver.getPositionControl(qsensed, qdes);
       jcmd.header.stamp = ros::Time::now();
       reducedJointModel(jcmd.joint_angles, qdes);
@@ -304,12 +307,12 @@ int main(int argc, char **argv)
 	jcmd.joint_angles[25]=0.0;
       }
       pub.publish(jcmd);
-      
+
       qsensed = qdes;
     }
     ros::spinOnce();
     rate.sleep();
-    
+
   }
   //#######################################################3
   return 0;

@@ -1,6 +1,6 @@
-/*                                                                               
+/*
  * Copyright 2016
- * J.Avalos, S.Cortez, O.Ramos. 
+ * J.Avalos, S.Cortez, O.Ramos.
  * Universidad de Ingenieria y Tecnologia - UTEC
  *
  * This file is part of nao_kinect_teleop.
@@ -23,14 +23,14 @@
 Marker::Marker(ros::NodeHandle& nh)
 {
   nh.param<std::string>("reference_frame", reference_frame_, "/map");
-  marker_pub_ = 
+  marker_pub_ =
     nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
 }
 
 
 unsigned int BallMarker::id_=0;
 
-BallMarker::BallMarker(ros::NodeHandle& nh, 
+BallMarker::BallMarker(ros::NodeHandle& nh,
                        double color[3],
                        const double& scale)
   : Marker(nh)

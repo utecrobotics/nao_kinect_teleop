@@ -1,6 +1,6 @@
-/*                                                                               
+/*
  * Copyright 2016
- * J.Avalos, S.Cortez 
+ * J.Avalos, S.Cortez
  * Universidad de Ingenieria y Tecnologia - UTEC
  *
  * This file is part of nao_kinect_teleop.
@@ -38,16 +38,16 @@ int main()
   HRESULT hResult = S_OK;
   hResult = GetDefaultKinectSensor(&pSensor);
   hResult = pSensor->Open();
-  
+
   IBodyFrameSource* pBodySource;
   hResult = pSensor->get_BodyFrameSource(&pBodySource);
-  
+
   IBodyFrameReader* pBodyReader;
   hResult = pBodySource->OpenReader(&pBodyReader);
-  
+
   ICoordinateMapper* pCoordinateMapper;
   hResult = pSensor->get_CoordinateMapper(&pCoordinateMapper);
-  
+
   //Inicializacion del envio de datos (Ubuntu)
   ros::NodeHandle nh;
   char *ros_master = "10.100.144.116";
@@ -69,31 +69,31 @@ int main()
   while (1)
   {
     Sleep(100);
-    
+
     IBodyFrame* pBodyFrame = nullptr;
     hResult = pBodyReader->AcquireLatestFrame(&pBodyFrame);
     if (SUCCEEDED(hResult)){
       IBody* pBody[BODY_COUNT] = { 0 };
       hResult = pBodyFrame->GetAndRefreshBodyData(BODY_COUNT, pBody);
-      
+
       if (pBodyFrame != nullptr)
       {
         for (int count = 0; count < BODY_COUNT; count++)
         {
           BOOLEAN bTracked = false;
           hResult = pBody[count]->get_IsTracked(&bTracked);
-          
+
           if (SUCCEEDED(hResult) && bTracked)
           {
             Joint joint[JointType::JointType_Count];
             hResult = pBody[count]->GetJoints(JointType::JointType_Count, joint);
-            
+
             if (SUCCEEDED(hResult))
             {
               // Estado de mano izquierda
               HandState leftHandState = HandState::HandState_Unknown;
               hResult = pBody[count]->get_HandLeftState(&leftHandState);
-              
+
               if (SUCCEEDED(hResult)){
                 if (leftHandState == HandState::HandState_Open){
                   body_msg.left_hand.data = true;
@@ -102,11 +102,11 @@ int main()
                   body_msg.left_hand.data = false;
                 }
               }
-              
+
               // Estado de mano derecha
               HandState rightHandState = HandState::HandState_Unknown;
               hResult = pBody[count]->get_HandRightState(&rightHandState);
-              
+
               if (SUCCEEDED(hResult)){
                 if (rightHandState == HandState::HandState_Open){
                   body_msg.right_hand.data = true;
@@ -115,12 +115,12 @@ int main()
                   body_msg.right_hand.data = false;
                 }
               }
-              
+
               //Articulaciones
               for (int i = 0; i < 6; i++){
                 if (joint[orden[i]].TrackingState != TrackingState::TrackingState_NotTracked){
                   CameraSpacePoint cameraSpacePoint = joint[orden[i]].Position;
-                  
+
                   body_msg.body[i].x = joint[orden[i]].Position.X;
                   body_msg.body[i].y = joint[orden[i]].Position.Y;
                   body_msg.body[i].z = joint[orden[i]].Position.Z;

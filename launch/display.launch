@@ -4,7 +4,7 @@
     <arg name="version" value="$(arg version)" />
   </include>
 
-  <arg name="config_file" value="$(find nao_osik)/config/nao.rviz"/>
+  <arg name="config_file" value="$(find nao_kinect_teleop)/config/nao.rviz"/>
   <node name="rviz_display" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(arg config_file)" />
 
   <param name="reference_frame" value="torso" />

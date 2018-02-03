@@ -2,11 +2,16 @@
 <package>
   <name>nao_kinect_teleop</name>
   <version>0.0.1</version>
-  <description> 
+  <description>
     Package to move the NAO robot in 3D through the motion of a person acquired
     with the Microsoft Kinect
   </description>
+  <author email="jose.avalos@utec.edu.pe">Jose Avalos</author>
+  <author email="sergio.cortez@utec.edu.pe">Sergio Cortez</author>
+  <author email="karina.vasquez@utec.edu.pe">Karina Vasquez</author>
+  <author email="oramos@utec.edu.pe">Oscar Ramos</author>
   <maintainer email="jose.avalos@utec.edu.pe">Jose Avalos</maintainer>
+  <maintainer email="oramos@utec.edu.pe">Oscar Ramos</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>

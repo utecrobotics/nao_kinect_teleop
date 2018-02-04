@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
+
   <name>nao_kinect_teleop</name>
   <version>0.0.1</version>
   <description>
@@ -14,10 +15,10 @@
   <maintainer email="oramos@utec.edu.pe">Oscar Ramos</maintainer>
   <license>BSD</license>
 
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>oscr</depend>
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>sensor_msgs</run_depend>
+  <exec_depend>nao_description</exec_depend>
 
 </package>

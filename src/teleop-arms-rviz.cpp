@@ -1,6 +1,6 @@
 /***
  * Copyright 2018
- * J.Avalos, O.Ramosx
+ * J.Avalos, O.Ramos
  * Universidad de Ingenieria y Tecnologia - UTEC
  *
  * This file is part of nao_kinect_teleop.
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
   // Operational-Space Inverse Kinematics (OSIK) solver
   // --------------------------------------------------------------------
   // Sampling time
-  unsigned int f = 30;
+  unsigned int f = 100;
   double dt = static_cast<double>(1.0/f);
   // Solver (WQP, HQP or NS)
   oscr::OSIKSolverWQP solver(robot, q, dt);
@@ -130,15 +130,10 @@ int main(int argc, char **argv)
   // Vectors for positions/poses
   Eigen::VectorXd p_rshoulder(3), p_relbow(3), p_rwrist(3);
   Eigen::VectorXd p_lshoulder(3), p_lelbow(3), p_lwrist(3);
-  Eigen::VectorXd pskel(3);
+  Eigen::VectorXd sk_rshoulder(3), sk_relbow(3), sk_rwrist(3);
+  Eigen::VectorXd sk_lshoulder(3), sk_lelbow(3), sk_lwrist(3);
   // Vector for the desired joint configuration
   Eigen::VectorXd qdes;
-  // Storage for points
-  std::vector< std::vector<double> > P;
-  P.resize(6);
-  // Allocate space for the points
-  for (unsigned int i=0; i<P.size(); ++i)
-    P[i].resize(3);
 
   ros::Rate rate(f); // Hz
   while(ros::ok())
@@ -149,49 +144,39 @@ int main(int argc, char **argv)
     if (n_kinect_points > 0)
     {
       ROS_INFO_ONCE("Kinect point values found!");
+
+      // Human skeleton points
+      // ------------------------------------------------------------------
+      // Get the human skeleton positions
+      sk_rshoulder = kpoints.getPointPositionById(0);
+      sk_relbow    = kpoints.getPointPositionById(1);
+      sk_rwrist    = kpoints.getPointPositionById(2);
+      sk_lshoulder = kpoints.getPointPositionById(3);
+      sk_lelbow    = kpoints.getPointPositionById(4);
+      sk_lwrist    = kpoints.getPointPositionById(5);
+      // Show the ball markers corresponding to the human skeleton
+      sk_bmarkers.at(0)->setPose(sk_rshoulder);
+      sk_bmarkers.at(1)->setPose(sk_relbow);
+      sk_bmarkers.at(2)->setPose(sk_rwrist);
+      sk_bmarkers.at(3)->setPose(sk_lshoulder);
+      sk_bmarkers.at(4)->setPose(sk_lelbow);
+      sk_bmarkers.at(5)->setPose(sk_lwrist);
       // Reset the line markers
       sk_lmarkers.reset();
-      // Show the body markers corresponding to the human skeleton
-      for (unsigned k=0; k<sk_bmarkers.size(); ++k)
-      {
-        pskel <<
-          kpoints.getPoints()->body[k].x,
-          kpoints.getPoints()->body[k].y,
-          kpoints.getPoints()->body[k].z;
-        sk_bmarkers.at(k)->setPose(pskel);
-
-        if ((k<sk_bmarkers.size()-1) && k!=2)
-        {
-          pskel <<
-            kpoints.getPoints()->body[k].x,
-            kpoints.getPoints()->body[k].y,
-            kpoints.getPoints()->body[k].z;
-          sk_lmarkers.setPose(pskel);
-          pskel <<
-            kpoints.getPoints()->body[k+1].x,
-            kpoints.getPoints()->body[k+1].y,
-            kpoints.getPoints()->body[k+1].z;
-          sk_lmarkers.setPose(pskel);
-        }
-      }
+      // Show the skeleton lines
+      sk_lmarkers.setPose(sk_rshoulder); sk_lmarkers.setPose(sk_relbow);
+      sk_lmarkers.setPose(sk_relbow);    sk_lmarkers.setPose(sk_rwrist);
+      sk_lmarkers.setPose(sk_lshoulder); sk_lmarkers.setPose(sk_lelbow);
+      sk_lmarkers.setPose(sk_lelbow);    sk_lmarkers.setPose(sk_lwrist);
+      sk_lmarkers.setPose(sk_rshoulder); sk_lmarkers.setPose(sk_lshoulder);
       sk_lmarkers.publish();
 
       // Right arm
       // ------------------------------------------------------------------
       // Positions with respect to the right shoulder
-      // 0: right shoulder;  1: right elbow;  2: right hand
-      for (unsigned int k=0; k<(P.size()/2); ++k)
-      {
-        // The shoulder is taken as the origin: P[0][k] := (0, 0, 0)
-        P[k][0] = (kpoints.getPoints()->body[k].x)-(kpoints.getPoints()->body[0].x);
-        P[k][1] = (kpoints.getPoints()->body[k].y)-(kpoints.getPoints()->body[0].y);
-        P[k][2] = (kpoints.getPoints()->body[k].z)-(kpoints.getPoints()->body[0].z);
-      }
-      // Assign values to eigen vectors
-      p_rshoulder << P[0][0], P[0][1], P[0][2];
-      p_relbow    << P[1][0], P[1][1], P[1][2];
-      p_rwrist    << P[2][0], P[2][1], P[2][2];
-
+      p_rshoulder = sk_rshoulder - sk_rshoulder;
+      p_relbow = sk_relbow - sk_rshoulder;
+      p_rwrist = sk_rwrist - sk_rshoulder;
       // Length ratio: (Nao limbs)/(human skeleton limbs)
       double k_rupperarm = Lnao_upperarm / p_relbow.norm();
       double k_rforearm  = Lnao_forearm / (p_rwrist-p_relbow).norm();
@@ -207,18 +192,10 @@ int main(int argc, char **argv)
       // Left arm
       // ------------------------------------------------------------------
       // Positions with respect to the left shoulder
-      // 3: left shoulder;  4: left elbow;  5: left hand
-      for (unsigned k=(P.size()/2);k<P.size();k++)
-      {
-        P[k][0] = (kpoints.getPoints()->body[k].x)-(kpoints.getPoints()->body[3].x);
-        P[k][1] = (kpoints.getPoints()->body[k].y)-(kpoints.getPoints()->body[3].y);
-        P[k][2] = (kpoints.getPoints()->body[k].z)-(kpoints.getPoints()->body[3].z);
-      }
-      p_lshoulder << P[3][0], P[3][1], P[3][2];
-      p_lelbow    << P[4][0], P[4][1], P[4][2];
-      p_lwrist    << P[5][0], P[5][1], P[5][2];
-
-      // Ratio: (Nao limbs)/(human skeleton limbs)
+      p_lshoulder = sk_lshoulder - sk_lshoulder;
+      p_lelbow = sk_lelbow - sk_lshoulder;
+      p_lwrist = sk_lwrist - sk_lshoulder;
+      // Length ratio: (Nao limbs)/(human skeleton limbs)
       double k_lupperarm = Lnao_upperarm / p_lelbow.norm();
       double k_lforearm  = Lnao_forearm / (p_lwrist-p_lelbow).norm();
       // Nao left shoulder (constant) position in base frame
@@ -244,11 +221,11 @@ int main(int argc, char **argv)
       taskle->setDesiredValue(p_lelbow);
       tasklh->setDesiredValue(p_lwrist);
 
+      // Get the inverse kinematics solution
       solver.getPositionControl(q, qdes);
       robot->updateJointConfig(q);
       jstate_pub.publish(robot->getJointConfig());
       // sk_bmarkers.update();
-      // fileq << qdes.transpose() << std::endl;
       q = qdes;
     }
     else

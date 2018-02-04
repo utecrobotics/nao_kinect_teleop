@@ -28,6 +28,7 @@ ADD_LIBRARY(nao_kinect_teleop SHARED
   src/tools.cpp
   src/utils/marker.cpp
   src/utils/ball-marker.cpp
+  src/utils/line-marker.cpp
   src/utils/frame-marker.cpp
   src/utils/kinect-arm-points.cpp
   src/utils/joint-state-pub.cpp

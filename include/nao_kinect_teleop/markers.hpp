@@ -3,6 +3,7 @@
 
 #include <nao_kinect_teleop/marker.hpp>
 #include <nao_kinect_teleop/ball-marker.hpp>
+#include <nao_kinect_teleop/line-marker.hpp>
 #include <nao_kinect_teleop/frame-marker.hpp>
 // #include <nao_kinect_teleop/marker-utils.hpp>
 

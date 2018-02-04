@@ -107,10 +107,12 @@ int main(int argc, char **argv)
   solver.pushTask(taskle);
 
   // Ball markers for the human skeleton
-  std::vector<BallMarker*> sk_markers;
-  sk_markers.resize(6);
-  for (unsigned int i=0; i<sk_markers.size(); ++i)
-    sk_markers.at(i) = new BallMarker(nh, RED);
+  std::vector<BallMarker*> sk_bmarkers;
+  sk_bmarkers.resize(6);
+  for (unsigned int i=0; i<sk_bmarkers.size(); ++i)
+    sk_bmarkers.at(i) = new BallMarker(nh, RED);
+  // Line markers for the human skeleton
+  LineMarker sk_lmarkers(nh, GREEN);
   // Ball markers for the retargeted (nao) skeleton
   std::vector<BallMarker*> nao_markers;
   nao_markers.resize(6);
@@ -146,21 +148,38 @@ int main(int argc, char **argv)
     // Only work when there are skeleton points from the Kinect
     if (n_kinect_points > 0)
     {
+      ROS_INFO_ONCE("Kinect point values found!");
+      // Reset the line markers
+      sk_lmarkers.reset();
       // Show the body markers corresponding to the human skeleton
-      for (unsigned k=0; k<sk_markers.size(); ++k)
+      for (unsigned k=0; k<sk_bmarkers.size(); ++k)
       {
         pskel <<
           kpoints.getPoints()->body[k].x,
           kpoints.getPoints()->body[k].y,
           kpoints.getPoints()->body[k].z;
-        sk_markers.at(k)->setPose(pskel);
-      }
+        sk_bmarkers.at(k)->setPose(pskel);
 
-      // ------------------------------------------------------------------
+        if ((k<sk_bmarkers.size()-1) && k!=2)
+        {
+          pskel <<
+            kpoints.getPoints()->body[k].x,
+            kpoints.getPoints()->body[k].y,
+            kpoints.getPoints()->body[k].z;
+          sk_lmarkers.setPose(pskel);
+          pskel <<
+            kpoints.getPoints()->body[k+1].x,
+            kpoints.getPoints()->body[k+1].y,
+            kpoints.getPoints()->body[k+1].z;
+          sk_lmarkers.setPose(pskel);
+        }
+      }
+      sk_lmarkers.publish();
+
       // Right arm
       // ------------------------------------------------------------------
-      // 0=shoulder;   1=elbow;    2=hand
-      // Get the positions with respect to the right shoulder
+      // Positions with respect to the right shoulder
+      // 0: right shoulder;  1: right elbow;  2: right hand
       for (unsigned int k=0; k<(P.size()/2); ++k)
       {
         // The shoulder is taken as the origin: P[0][k] := (0, 0, 0)
@@ -168,113 +187,75 @@ int main(int argc, char **argv)
         P[k][1] = (kpoints.getPoints()->body[k].y)-(kpoints.getPoints()->body[0].y);
         P[k][2] = (kpoints.getPoints()->body[k].z)-(kpoints.getPoints()->body[0].z);
       }
-      // Length from right shoulder to right elbow
-      double Lskel_rupperarm = sqrt( pow(P[1][0],2.0) +
-                                     pow(P[1][1],2.0) +
-                                     pow(P[1][2],2.0));
-      // Length from right elbow to right hand
-      double Lskel_rforearm= sqrt(pow(P[2][0] - P[1][0], 2.0) +
-                                  pow(P[2][1] - P[1][1], 2.0) +
-                                  pow(P[2][2] - P[1][2], 2.0));
-      // Ratio: (Nao limbs)/(human skeleton limbs)
-      double Q1 = Lnao_upperarm / Lskel_rupperarm;
-      double Q2 = Lnao_forearm / Lskel_rforearm;
-      // Nao right shoulder position
-      P[0][0] = 0.00;
-      P[0][1] = -0.098;
-      P[0][2] = 0.100;
-      // Redefinimos P2
-      P[2][0] = Q2*(P[2][0] - P[1][0]);
-      P[2][1] = Q2*(P[2][1] - P[1][1]);
-      P[2][2] = Q2*(P[2][2] - P[1][2]);
-      // Redefinimos P1
-      P[1][0] = P[0][0]+Q1*P[1][0];
-      P[1][1] = P[0][1]+Q1*P[1][1];
-      P[1][2] = P[0][2]+Q1*P[1][2];
+      // Assign values to eigen vectors
+      p_rshoulder << P[0][0], P[0][1], P[0][2];
+      p_relbow    << P[1][0], P[1][1], P[1][2];
+      p_rwrist    << P[2][0], P[2][1], P[2][2];
 
-      P[2][0] = P[2][0]+P[1][0];
-      P[2][1] = P[2][1]+P[1][1];
-      P[2][2] = P[2][2]+P[1][2];
+      // Length ratio: (Nao limbs)/(human skeleton limbs)
+      double k_rupperarm = Lnao_upperarm / p_relbow.norm();
+      double k_rforearm  = Lnao_forearm / (p_rwrist-p_relbow).norm();
+      // Nao right shoulder (constant) position in base frame
+      p_rshoulder << 0.0, -0.098, 0.1;
+      // Wrist wrt elbow retargeting the length to NAO
+      p_rwrist = k_rforearm*(p_rwrist-p_relbow);
+      // Elbow retargeting the length to NAO, in base frame
+      p_relbow = p_rshoulder + k_rupperarm*p_relbow;
+      // Wrist in base frame
+      p_rwrist = p_rwrist + p_relbow;
 
-      // ------------------------------------------------------------------
       // Left arm
       // ------------------------------------------------------------------
-      // 3=shoulder;   4=elbow;    5=hand
-      // Get the positions with respect to the left shoulder
+      // Positions with respect to the left shoulder
+      // 3: left shoulder;  4: left elbow;  5: left hand
       for (unsigned k=(P.size()/2);k<P.size();k++)
       {
         P[k][0] = (kpoints.getPoints()->body[k].x)-(kpoints.getPoints()->body[3].x);
         P[k][1] = (kpoints.getPoints()->body[k].y)-(kpoints.getPoints()->body[3].y);
         P[k][2] = (kpoints.getPoints()->body[k].z)-(kpoints.getPoints()->body[3].z);
       }
-      // Length from left shoulder to left elbow
-      double Lskel_lupperarm = sqrt(pow(P[4][0], 2.0) +
-                                    pow(P[4][1], 2.0) +
-                                    pow(P[4][2], 2.0));
-      // Length from left elbow to left hand
-      double Lskel_lforearm = sqrt(pow(P[5][0] - P[4][0], 2.0) +
-                                   pow(P[5][1] - P[4][1], 2.0) +
-                                   pow(P[5][2] - P[4][2], 2.0));
+      p_lshoulder << P[3][0], P[3][1], P[3][2];
+      p_lelbow    << P[4][0], P[4][1], P[4][2];
+      p_lwrist    << P[5][0], P[5][1], P[5][2];
 
-      double Q3 = Lnao_upperarm / Lskel_lupperarm;
-      double Q4 = Lnao_forearm / Lskel_lforearm;
-      // Nao left shoulder position
-      P[3][0] = 0.00;
-      P[3][1] = 0.098;
-      P[3][2] = 0.100;
-      //Redefinimos P5
-      P[5][0] = Q4*(P[5][0] - P[4][0]);
-      P[5][1] = Q4*(P[5][1] - P[4][1]);
-      P[5][2] = Q4*(P[5][2] - P[4][2]);
-      //Redfinimos P4
-      P[4][0] = P[3][0]+Q3*P[4][0];
-      P[4][1] = P[3][1]+Q3*P[4][1];
-      P[4][2] = P[3][2]+Q3*P[4][2];
+      // Ratio: (Nao limbs)/(human skeleton limbs)
+      double k_lupperarm = Lnao_upperarm / p_lelbow.norm();
+      double k_lforearm  = Lnao_forearm / (p_lwrist-p_lelbow).norm();
+      // Nao left shoulder (constant) position in base frame
+      p_lshoulder << 0.0, 0.098, 0.1;
+      // Wrist wrt elbow retargeting the length to NAO
+      p_lwrist = k_lforearm*(p_lwrist-p_lelbow);
+      // Elbow retargeting the length to NAO, in base frame
+      p_lelbow = p_lshoulder + k_lupperarm*p_lelbow;
+      // Wrist in base frame
+      p_lwrist = p_lwrist + p_lelbow;
 
-      P[5][0] = P[5][0]+P[4][0];
-      P[5][1] = P[5][1]+P[4][1];
-      P[5][2] = P[5][2]+P[4][2];
-      //#######################################################
-
-      // Right shoulder
-      p_rshoulder << P[0][0], P[0][1], P[0][2];
-      // Right elbow
-      p_relbow << P[1][0], P[1][1], P[1][2];
-      // Right hand
-      p_rwrist << P[2][0], P[2][1], P[2][2];
-      // Show markers for the right arm
+      // Show markers for NAO
       nao_markers.at(0)->setPose(p_relbow);
       nao_markers.at(1)->setPose(p_rwrist);
       nao_markers.at(2)->setPose(p_rshoulder);
-
-      // Left shoulder
-      p_lshoulder << P[3][0], P[3][1], P[3][2];
-      // Left elbow
-      p_lelbow << P[4][0], P[4][1], P[4][2];
-      // Left hand
-      p_lwrist << P[5][0], P[5][1], P[5][2];
-      // Show markers for the left arm
       nao_markers.at(3)->setPose(p_lelbow);
       nao_markers.at(4)->setPose(p_lwrist);
       nao_markers.at(5)->setPose(p_lshoulder);
 
       // Set the desired positions for the tasks
-      taskle->setDesiredValue(p_lelbow);
-      tasklh->setDesiredValue(p_lwrist);
       taskre->setDesiredValue(p_relbow);
       taskrh->setDesiredValue(p_rwrist);
+      taskle->setDesiredValue(p_lelbow);
+      tasklh->setDesiredValue(p_lwrist);
 
       solver.getPositionControl(q, qdes);
       robot->updateJointConfig(q);
       jstate_pub.publish(robot->getJointConfig());
-      // sk_markers.update();
+      // sk_bmarkers.update();
       // fileq << qdes.transpose() << std::endl;
       q = qdes;
     }
     else
     {
-      std::cout << "No skeleton points from Kinect found (" << n_kinect_points
-                << " points)" << std::endl;
+
+      ROS_WARN_THROTTLE(1, "Not enough (%d) skeleton points from kinect found",
+                        n_kinect_points);
     }
     ros::spinOnce();
     rate.sleep();

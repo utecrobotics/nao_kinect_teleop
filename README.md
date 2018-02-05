@@ -1,25 +1,30 @@
-nao_kinect_teleop - Package to teleoperate NAO using the Kinect
+nao_kinect_teleop - Package to teleoperate NAO using the Kinect v2
 
 Introduction
 ============
 
 nao_kinect_teleop is a ROS package that allows to teleoperate the NAO robot
-using the motion shown by a person. The motion is acquired using a Microsoft
-Kinect sensor (in a windows host) and is sent to ROS using rosserial.
+using the motion shown by a person.
+
+### Installation
+
+For instructions about installation, see the INSTALL.md file
+
+### Usage
+
+For instructions about the usage of the teleoperation, see the HOWTO.md file
 
 ### Dependencies
 
-The nao_kinect_teleop package dependds on the following libraries/packages
+The nao_kinect_teleop package depends on the following libraries/packages
 which have to be available in your machine.
 
   - Libraries:
-    - rbdl (with urdf support)
-    - qpOASES
+    - oscr-deps
+    - oscr
     - Eigen (>=3.2)
   - ROS Packages:
-    - osik_control (https://github.com/utecrobotics/osik-control)
-    - kinect_msgs (https://github.com/utecrobotics/kinect_msgs)
-    - rosserial (https://github.com/ros-drivers/rosserial)
+    - kinect_v2 and kinect_msgs (https://github.com/utecrobotics/kinect)
     - nao ROS Support (For details, see http://wiki.ros.org/nao)
   - Other Software:
     - NAOqi

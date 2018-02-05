@@ -31,18 +31,26 @@ ADD_LIBRARY(nao_kinect_teleop SHARED
   src/utils/line-marker.cpp
   src/utils/frame-marker.cpp
   src/utils/kinect-arm-points.cpp
+  src/utils/nao-interface.cpp
   src/utils/joint-state-pub.cpp
   )
 
-# ADD_EXECUTABLE(nao_arms_teleop src/nao_arms_teleop.cpp)
-# TARGET_LINK_LIBRARIES(nao_arms_teleop
-#   nao_kinect_teleop
-#   ${catkin_LIBRARIES}
-#   ${OSCR_LIBRARIES}
-# )
+ADD_EXECUTABLE(nao_arms_teleop src/nao_arms_teleop.cpp)
+TARGET_LINK_LIBRARIES(nao_arms_teleop
+  nao_kinect_teleop
+  ${catkin_LIBRARIES}
+  ${OSCR_LIBRARIES}
+)
 
-ADD_EXECUTABLE(nao_teleop_arms_rviz src/teleop-arms-rviz.cpp)
+add_executable(nao_teleop_arms_rviz src/teleop-arms-rviz.cpp)
 TARGET_LINK_LIBRARIES(nao_teleop_arms_rviz
+  nao_kinect_teleop
+  ${catkin_LIBRARIES}
+  ${OSCR_LIBRARIES}
+)
+
+add_executable(nao_teleop_arms src/teleop-arms.cpp)
+TARGET_LINK_LIBRARIES(nao_teleop_arms
   nao_kinect_teleop
   ${catkin_LIBRARIES}
   ${OSCR_LIBRARIES}

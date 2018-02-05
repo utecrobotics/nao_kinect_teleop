@@ -13,8 +13,10 @@ Teleoperate arms of the real NAO
    ```
 
 4. Start sending joint (skeleton) values from the Kinect v2 (in another
-   terminal)
+   terminal). This needs to be launched from the kinect_v2 package to have
+   acces to the NiTE features
    ```
+   roscd kinect_v2
    rosrun kinect_v2 mainBodyArray
    ```
 

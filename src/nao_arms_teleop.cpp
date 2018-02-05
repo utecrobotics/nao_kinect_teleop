@@ -1,6 +1,6 @@
 /*
- * Copyright 2016
- * J.Avalos, S.Cortez, O.Ramos.
+ * Copyright 2018
+ * J.Avalos, O.Ramos
  * Universidad de Ingenieria y Tecnologia - UTEC
  *
  * This file is part of nao_kinect_teleop.
@@ -17,90 +17,70 @@
  */
 
 /*
-  -----------------------------------------
-  Teleoperation of NAO using a Kinect v2
-  -----------------------------------------
+  -------------------------------------------------------------
+  Initial version of the Teleoperation of NAO using a Kinect v2
+  -------------------------------------------------------------
 */
 
 #include <cmath>
+
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <sensor_msgs/JointState.h>
 #include <naoqi_bridge_msgs/JointAnglesWithSpeed.h>
 
-#include <robot-model/robot-model.hpp>
-#include <osik-control/math-tools.hpp>
-#include <osik-control/kine-task.hpp>
-#include <osik-control/kine-task-pose.hpp>
-#include <osik-control/kine-solver-WQP.hpp>
+#include <oscr/oscr.hpp>
 
 #include <nao_kinect_teleop/robotSpecifics.h>
 #include <nao_kinect_teleop/tools.hpp>
+#include <nao_kinect_teleop/kinect-arm-points.hpp>
 #include <kinect_msgs/BodyArray.h>
-
-
-using namespace osik;
-
-
-//################ CLASS #################################
-class KinectPoints
-{
-public:
-  KinectPoints()
-    : msg_(new kinect_msgs::BodyArray)
-  {
-     std::cout << msg_->body.size() << std::endl;
-  }
-  void readKinectPoints(const kinect_msgs::BodyArray::ConstPtr& msg)
-  {
-    msg_ = msg;
-  }
-  kinect_msgs::BodyArray::ConstPtr getPoints()
-  {
-    return msg_;
-  }
-private:
-  kinect_msgs::BodyArray::ConstPtr msg_;
-};
-//########################################################
 
 
 int main(int argc, char **argv)
 {
-  //INICIO DEL PROCESO DE INFORMACION AL NAO
-  std::string nao_description = ros::package::getPath("nao_description");
-  std::string model_name = nao_description + "/urdf/naoV40_generated_urdf/nao.urdf";
-  RobotModel* robot = new RobotModel();
+  // Load the urdf model
+  // --------------------------------------------------------------------
+  // The robot is assumed to be fixed on the ground (its chest)
   bool has_floating_base = false;
-  if (!robot->loadURDF(model_name, has_floating_base))
-    return -1;
-  else
-    std::cout << "Robot " << model_name << " loaded." << std::endl;
+  std::string nao_description = ros::package::getPath("nao_description");
+  std::string model_name =
+    nao_description + "/urdf/naoV40_generated_urdf/nao.urdf";
+  oscr::RobotModel* robot = new oscr::RobotModelRbdl(model_name,
+                                                     has_floating_base);
 
-  unsigned int ndof_full = robot->ndof();        // All 42 joints
+  unsigned int ndof_full = robot->ndof();         // All 42 joints
   unsigned int ndof_fingers = 16;
-  unsigned int ndof_red = ndof_full-ndof_fingers; // 26 joints (excluding fingers)
+  unsigned int ndof_red = ndof_full-ndof_fingers; // 26 joints (w/o fingers)
 
   // Get the joint names and joint limits
-  std::vector<std::string> jnames;
-  std::vector<double> qmin, qmax, dqmax;
-  jnames = robot->jointNames();
+  std::vector<std::string> jnames = robot->jointNames();
+  Eigen::VectorXd qmin, qmax, dqmax;
   qmin  = robot->jointMinAngularLimits();
   qmax  = robot->jointMaxAngularLimits();
   dqmax = robot->jointVelocityLimits();
+
   //******************************************
   //INICIO DEL PROCESO DE RECEPCION
   //******************************************
-  ros::init(argc, argv, "show_points");
+  ros::init(argc, argv, "nao_arms_teleop");
   ros::NodeHandle nh;
 
-  KinectPoints kpoints;
+  KinectArmPoints kpoints;
   //Suscriber
-  ros::Subscriber sub_1 = nh.subscribe("kinect_points", 1000, &KinectPoints::readKinectPoints, &kpoints);
+  ros::Subscriber sub_1 = nh.subscribe("kinect_points",
+                                       1000,
+                                       &KinectArmPoints::readKinectPoints,
+                                       &kpoints);
   //Publisher
-  ros::Publisher pub = nh.advertise<naoqi_bridge_msgs::JointAnglesWithSpeed>("joint_angles", 1000);
+  ros::Publisher pub
+    = nh.advertise<naoqi_bridge_msgs::JointAnglesWithSpeed>("joint_angles",
+                                                            1000);
   JointSensors jsensor;
-  ros::Subscriber sub_2 = nh.subscribe("joint_states", 1000,&JointSensors::readJointSensors, &jsensor);
+  ros::Subscriber sub_2 = nh.subscribe("joint_states",
+                                       1000,
+                                       &JointSensors::readJointSensors,
+                                       &jsensor);
 
   std::vector< std::vector<double> > P;
   P.resize(6);
@@ -112,7 +92,7 @@ int main(int argc, char **argv)
   // Get the initial sensed joint values (from "joint_states" topic)
   std::cout << "Reading initial sensor values ..." << std::endl;
   ros::Rate iter_rate(1000); // Hz
-  unsigned int niter=0, max_iter = 1e3;
+  unsigned int niter = 0, max_iter = 1e3;
   unsigned int ndof_sensed = jsensor.sensedValue()->position.size();
   while (ndof_sensed != ndof_red)
   {
@@ -141,42 +121,46 @@ int main(int argc, char **argv)
 
   // Initialize names of command joints
   for (unsigned int i=0; i<ndof_full; ++i)
-  {
+  { 
     if (ridx[i] != 100)
      jcmd.joint_names[ridx[i]] = jnames[i];
   }
 
-  // Tasks and Inverse Kinematics Solver
-  // ************************************
 
-  // Sampling time
-  unsigned int f = 30;   // Frequency
-  double dt = static_cast<double>(1.0/f);
-
-  KineSolverWQP solver(robot, qsensed, dt);
-  solver.setJointLimits(qmin, qmax, dqmax);
-
-
-  //KineTask* taskrh = new KineTaskPose(robot, RGRIPPER, "position");
-  KineTask* taskrh = new KineTaskPose(robot, RGRIPPER, "position");
+  // Inverse Kinematics tasks
+  // --------------------------------------------------------------------
+  oscr::KineTask* taskrh = new oscr::KineTaskPose(robot, RGRIPPER, "position");
   taskrh->setGain(300.0);
-  KineTask* tasklh = new KineTaskPose(robot, LGRIPPER, "position");
+  oscr::KineTask* tasklh = new oscr::KineTaskPose(robot, LGRIPPER, "position");
   tasklh->setGain(300.0);
-  KineTask* taskre = new KineTaskPose(robot, RELBOW, "position");
+  oscr::KineTask* taskre = new oscr::KineTaskPose(robot, RELBOW, "position");
   taskre->setGain(300.0);
-  KineTask* taskle = new KineTaskPose(robot, LELBOW, "position");
+  oscr::KineTask* taskle = new oscr::KineTaskPose(robot, LELBOW, "position");
   taskle->setGain(300.0);
 
-  Eigen::VectorXd P_right_wrist;
-  Eigen::VectorXd P_right_elbow;
-  Eigen::VectorXd P_left_wrist;
-  Eigen::VectorXd P_left_elbow;
-
+  // Operational-Space Inverse Kinematics (OSIK) solver
+  // --------------------------------------------------------------------
+  // Sampling time
+  unsigned int f = 30;
+  double dt = static_cast<double>(1.0/f);
+  // Solver (WQP, HQP or NS)
+  oscr::OSIKSolverWQP solver(robot, qsensed, dt);
+  solver.setJointLimits(qmin, qmax, dqmax);
+  // Add tasks to the solver
   solver.pushTask(taskrh);
   solver.pushTask(tasklh);
   solver.pushTask(taskre);
   solver.pushTask(taskle);
 
+  // Nao lengths
+  double Lnao_upperarm = 0.108;  // From shoulder to elbow
+  double Lnao_forearm  = 0.111;  // From elbow to hand
+  // Vectors for positions/poses
+  Eigen::VectorXd p_rshoulder(3), p_relbow(3), p_rwrist(3);
+  Eigen::VectorXd p_lshoulder(3), p_lelbow(3), p_lwrist(3);
+  Eigen::VectorXd sk_rshoulder(3), sk_relbow(3), sk_rwrist(3);
+  Eigen::VectorXd sk_lshoulder(3), sk_lelbow(3), sk_lwrist(3);
+  // Vector for the desired joint configuration
   Eigen::VectorXd qdes;
 
   ros::Rate rate(f); // Hz
@@ -184,113 +168,64 @@ int main(int argc, char **argv)
   //#######################################################
   while(ros::ok())
   {
-    std::cout << "size: " << kpoints.getPoints()->body.size() << std::endl;
+    unsigned int n_kinect_points = kpoints.getPoints()->body.size();
 
-    if (kpoints.getPoints()->body.size() > 0)
+    // Only work when there are skeleton points from the Kinect
+    if (n_kinect_points > 0)
     {
-      //Datos del Nao
-      double L1 = 0.108; //Del hombro al codo
-      double L2 = 0.111; //Del codo a la mano
+      ROS_INFO_ONCE("Kinect point values found!");
 
-      //Recepcion del brazo derecho
-      for (unsigned k=0;k<(P.size()/2);k++)
-      {
-        P[k].resize(3);
-        //A partir de eso P[0][k]=(0,0,0)
-        P[k][0] = (-kpoints.getPoints()->body[k].z)-(-kpoints.getPoints()->body[0].z);
-        P[k][1] = (-kpoints.getPoints()->body[k].x)-(-kpoints.getPoints()->body[0].x);
-        P[k][2] = (kpoints.getPoints()->body[k].y)-(kpoints.getPoints()->body[0].y);
-      }
+      // Human skeleton points
+      // ------------------------------------------------------------------
+      // Get the human skeleton positions
+      sk_rshoulder = kpoints.getPointPositionById(0);
+      sk_relbow    = kpoints.getPointPositionById(1);
+      sk_rwrist    = kpoints.getPointPositionById(2);
+      sk_lshoulder = kpoints.getPointPositionById(3);
+      sk_lelbow    = kpoints.getPointPositionById(4);
+      sk_lwrist    = kpoints.getPointPositionById(5);
 
-      //Construimos los puntos (0,0,0); P1; P2
-      //Hallamos el modulo M1 de P1
-      double M1= sqrt(pow(P[1][0],2.0)+pow(P[1][1],2.0)+pow(P[1][2],2.0));
-      //Hallamos el modulo M2 de (P2-P1)
-      double M2= sqrt(pow(P[2][0]- P[1][0], 2.0) + pow(P[2][1]- P[1][1], 2.0) +
-                      pow(P[2][2]- P[1][2], 2.0));
-      //Determimos las proporcionalidades
-      double Q1 = L1 / M1;
-      double Q2 = L2 / M2;
+      // Right arm
+      // ------------------------------------------------------------------
+      // Positions with respect to the right shoulder
+      p_rshoulder = sk_rshoulder - sk_rshoulder;
+      p_relbow = sk_relbow - sk_rshoulder;
+      p_rwrist = sk_rwrist - sk_rshoulder;
+      // Length ratio: (Nao limbs)/(human skeleton limbs)
+      double k_rupperarm = Lnao_upperarm / p_relbow.norm();
+      double k_rforearm  = Lnao_forearm / (p_rwrist-p_relbow).norm();
+      // Nao right shoulder (constant) position in base frame
+      p_rshoulder << 0.0, -0.098, 0.1;
+      // Wrist wrt elbow retargeting the length to NAO
+      p_rwrist = k_rforearm*(p_rwrist-p_relbow);
+      // Elbow retargeting the length to NAO, in base frame
+      p_relbow = p_rshoulder + k_rupperarm*p_relbow;
+      // Wrist in base frame
+      p_rwrist = p_rwrist + p_relbow;
 
-      //Redefinimos P1
-      P[0][0] = 0.00;
-      P[0][1] = 0.098;
-      P[0][2] = 0.100;
-      //Redefinimos P2
-      P[2][0] = Q2*(P[2][0] - P[1][0]);
-      P[2][1] = Q2*(P[2][1] - P[1][1]);
-      P[2][2] = Q2*(P[2][2] - P[1][2]);
-      //Redefinimos P1
-      P[1][0] = P[0][0]+Q1*P[1][0];
-      P[1][1] = P[0][1]+Q1*P[1][1];
-      P[1][2] = P[0][2]+Q1*P[1][2];
+      // Left arm
+      // ------------------------------------------------------------------
+      // Positions with respect to the left shoulder
+      p_lshoulder = sk_lshoulder - sk_lshoulder;
+      p_lelbow = sk_lelbow - sk_lshoulder;
+      p_lwrist = sk_lwrist - sk_lshoulder;
+      // Length ratio: (Nao limbs)/(human skeleton limbs)
+      double k_lupperarm = Lnao_upperarm / p_lelbow.norm();
+      double k_lforearm  = Lnao_forearm / (p_lwrist-p_lelbow).norm();
+      // Nao left shoulder (constant) position in base frame
+      p_lshoulder << 0.0, 0.098, 0.1;
+      // Wrist wrt elbow retargeting the length to NAO
+      p_lwrist = k_lforearm*(p_lwrist-p_lelbow);
+      // Elbow retargeting the length to NAO, in base frame
+      p_lelbow = p_lshoulder + k_lupperarm*p_lelbow;
+      // Wrist in base frame
+      p_lwrist = p_lwrist + p_lelbow;
 
-      P[2][0] = P[2][0]+P[1][0];
-      P[2][1] = P[2][1]+P[1][1];
-      P[2][2] = P[2][2]+P[1][2];
-
-      // Recepcion del brazo izquierdo
-      for (unsigned k=(P.size()/2);k<P.size();k++)
-      {
-	P[k].resize(3);
-	P[k][0] = (-kpoints.getPoints()->body[k].z)-(-kpoints.getPoints()->body[3].z);
-	P[k][1] = (-kpoints.getPoints()->body[k].x)-(-kpoints.getPoints()->body[3].x);
-	P[k][2] = (kpoints.getPoints()->body[k].y)-(kpoints.getPoints()->body[3].y);
-      }
-      //Hallamos el modulo M1 de P4
-      double M3 = sqrt(pow(P[4][0], 2.0) + pow(P[4][1], 2.0) + pow(P[4][2], 2.0));
-      //Hallamos el modulo M2 de (P2-P1)
-      double M4 = sqrt(pow(P[5][0] - P[4][0], 2.0) + pow(P[5][1] - P[4][1], 2.0) + pow(P[5][2] - P[4][2], 2.0));
-
-      double Q3 = L1 / M3;
-      double Q4 = L2 / M4;
-      //Construimos los puntos (0,0,0); P4; P5
-      P[3][0] = 0.00;
-      P[3][1] = -0.098;
-      P[3][2] = 0.100;
-      //Redefinimos P5
-      P[5][0] = Q4*(P[5][0] - P[4][0]);
-      P[5][1] = Q4*(P[5][1] - P[4][1]);
-      P[5][2] = Q4*(P[5][2] - P[4][2]);
-      //Redfinimos P4
-      P[4][0] = P[3][0]+Q3*P[4][0];
-      P[4][1] = P[3][1]+Q3*P[4][1];
-      P[4][2] = P[3][2]+Q3*P[4][2];
-
-      P[5][0] = P[5][0]+P[4][0];
-      P[5][1] = P[5][1]+P[4][1];
-      P[5][2] = P[5][2]+P[4][2];
-      //#######################################################
-
-      P_right_wrist.resize(3);
-      P_left_wrist.resize(3);
-      P_right_elbow.resize(3);
-      P_left_elbow.resize(3);
-
-      //Elbow Izquierdo
-      P_left_elbow[0] = P[1][0];
-      P_left_elbow[1] = P[1][1];
-      P_left_elbow[2] = P[1][2];
-
-      //Left hand
-      P_left_wrist[0] = P[2][0];
-      P_left_wrist[1] = P[2][1];
-      P_left_wrist[2] = P[2][2];
-
-      //Right elbow
-      P_right_elbow[0] = P[4][0];
-      P_right_elbow[1] = P[4][1];
-      P_right_elbow[2] = P[4][2];
-
-      //Right hand
-      P_right_wrist[0] = P[5][0];
-      P_right_wrist[1] = P[5][1];
-      P_right_wrist[2] = P[5][2];
-
-      taskle->setDesiredValue(P_left_elbow);
-      tasklh->setDesiredValue(P_left_wrist);
-      taskre->setDesiredValue(P_right_elbow);
-      taskrh->setDesiredValue(P_right_wrist);
+      // Set the desired positions for the tasks
+      taskre->setDesiredValue(p_relbow);
+      taskrh->setDesiredValue(p_rwrist);
+      taskle->setDesiredValue(p_lelbow);
+      tasklh->setDesiredValue(p_lwrist);
 
       solver.getPositionControl(qsensed, qdes);
       jcmd.header.stamp = ros::Time::now();
@@ -310,10 +245,16 @@ int main(int argc, char **argv)
 
       qsensed = qdes;
     }
+    else
+    {
+
+      ROS_WARN_THROTTLE(1, "Not enough (%d) skeleton points from kinect found",
+                        n_kinect_points);
+    }
+
     ros::spinOnce();
     rate.sleep();
-
   }
-  //#######################################################3
+
   return 0;
 }

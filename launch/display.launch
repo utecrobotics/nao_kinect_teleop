@@ -1,5 +1,6 @@
 <launch>
   <arg name="version" default="V40" />
+
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find nao_description)/urdf/nao$(arg version)_generated_urdf/nao_robot.xacro" />
 
   <!-- Load the robot state publisher -->
@@ -9,11 +10,14 @@
   <!-- Complete robot model with base_footprint -->
   <node pkg="nao_description" type="base_footprint" name="base_footprint" />
 
-  <arg name="config_file" value="$(find nao_kinect_teleop)/config/nao.rviz"/>
+  <!-- Launch rviz -->
+  <arg name="config_file"
+       default="$(find nao_kinect_teleop)/config/nao.rviz"/>
   <node name="rviz_display" pkg="rviz" type="rviz" respawn="false"
         output="screen" args="-d $(arg config_file)" />
 
   <!-- Reference frame for the markers -->
-  <param name="reference_frame" value="base_link" />
+  <arg name="ref_frame" default="base_link" />
+  <param name="reference_frame" value="$(arg ref_frame)" />
 
 </launch>

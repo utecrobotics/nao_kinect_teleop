@@ -21,7 +21,7 @@
 
 
 #include <sensor_msgs/JointState.h>
-#include <nao_kinect_teleop/robotSpecifics.h>
+#include <nao_kinect_teleop/deprecated/robotSpecifics.h>
 #include <Eigen/Dense>
 
 

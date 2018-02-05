@@ -25,7 +25,6 @@ LINK_DIRECTORIES(
 )
 
 ADD_LIBRARY(nao_kinect_teleop SHARED
-  src/tools.cpp
   src/utils/marker.cpp
   src/utils/ball-marker.cpp
   src/utils/line-marker.cpp
@@ -35,8 +34,10 @@ ADD_LIBRARY(nao_kinect_teleop SHARED
   src/utils/joint-state-pub.cpp
   )
 
-ADD_EXECUTABLE(nao_arms_teleop src/nao_arms_teleop.cpp)
-TARGET_LINK_LIBRARIES(nao_arms_teleop
+ADD_EXECUTABLE(deprec_nao_arms_teleop
+  src/deprecated/nao_arms_teleop.cpp
+  src/deprecated/tools.cpp)
+TARGET_LINK_LIBRARIES(deprec_nao_arms_teleop
   nao_kinect_teleop
   ${catkin_LIBRARIES}
   ${OSCR_LIBRARIES}

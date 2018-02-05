@@ -31,8 +31,8 @@
 
 #include <oscr/oscr.hpp>
 
-#include <nao_kinect_teleop/robotSpecifics.h>
-#include <nao_kinect_teleop/tools.hpp>
+#include <nao_kinect_teleop/deprecated/robotSpecifics.h>
+#include <nao_kinect_teleop/deprecated/tools.hpp>
 #include <nao_kinect_teleop/kinect-arm-points.hpp>
 #include <kinect_msgs/BodyArray.h>
 

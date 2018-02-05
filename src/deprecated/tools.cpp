@@ -17,7 +17,7 @@
  */
 
 
-#include <nao_kinect_teleop/tools.hpp>
+#include <nao_kinect_teleop/deprecated/tools.hpp>
 
 
 JointSensors::JointSensors()

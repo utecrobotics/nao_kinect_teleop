@@ -54,5 +54,5 @@ Teleoperate arms of a simulated NAO (with naoqi)
 5. Wait until the skeleton is properly detected. Then start the NAO motion
    (in another terminal)
    ```
-   rosrun nao_kinect_teleop nao_arms_teleop
+   rosrun nao_kinect_teleop nao_teleop_arms
    ```

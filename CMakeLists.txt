@@ -34,25 +34,23 @@ ADD_LIBRARY(nao_kinect_teleop SHARED
   src/utils/joint-state-pub.cpp
   )
 
+SET(ALL_LIBRARIES
+  nao_kinect_teleop
+  ${catkin_LIBRARIES}
+  ${OSCR_LIBRARIES}
+)
+
+# Deprecated example
 ADD_EXECUTABLE(deprec_nao_arms_teleop
   src/deprecated/nao_arms_teleop.cpp
   src/deprecated/tools.cpp)
-TARGET_LINK_LIBRARIES(deprec_nao_arms_teleop
-  nao_kinect_teleop
-  ${catkin_LIBRARIES}
-  ${OSCR_LIBRARIES}
-)
+TARGET_LINK_LIBRARIES(deprec_nao_arms_teleop ${ALL_LIBRARIES})
 
-add_executable(nao_teleop_arms_rviz src/teleop-arms-rviz.cpp)
-TARGET_LINK_LIBRARIES(nao_teleop_arms_rviz
-  nao_kinect_teleop
-  ${catkin_LIBRARIES}
-  ${OSCR_LIBRARIES}
-)
+# Executable to teleoperate the arms with RViz
+ADD_EXECUTABLE(nao_teleop_arms_rviz src/teleop-arms-rviz.cpp)
+TARGET_LINK_LIBRARIES(nao_teleop_arms_rviz ${ALL_LIBRARIES})
 
-add_executable(nao_teleop_arms src/teleop-arms.cpp)
-TARGET_LINK_LIBRARIES(nao_teleop_arms
-  nao_kinect_teleop
-  ${catkin_LIBRARIES}
-  ${OSCR_LIBRARIES}
-)
+# Executable to teleoperate the arms with Naoqi (and the real robot)
+ADD_EXECUTABLE(nao_teleop_arms src/teleop-arms.cpp)
+TARGET_LINK_LIBRARIES(nao_teleop_arms ${ALL_LIBRARIES})
+

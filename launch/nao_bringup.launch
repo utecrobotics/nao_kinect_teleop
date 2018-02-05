@@ -21,6 +21,10 @@
          value="$(find nao_kinect_teleop)/config/nao-base-footprint.rviz"/>
   </include>
 
+  <!-- Show a blue floor -->
+  <node pkg="nao_kinect_teleop" type="floor_publisher" name="floor_publisher">
+  </node>
+
   <!-- Bridge NAOqi sensors to ROS
        Publish /joint_states, /joint_stiffness, /odom, /imu from NAOqi to ROS
        topics. Also add logs to /rosout

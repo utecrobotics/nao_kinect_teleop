@@ -7,10 +7,9 @@ Teleoperate arms of the real NAO
    ```
 
 2. Launch ROS and NAO bridge replacing NAO_IP with the real IP address of the
-   robot (each in a new terminal)
+   robot (in a new terminal)
    ```
    roslaunch nao_kinect_teleop nao_bringup.launch nao_ip:=NAO_IP
-   roslaunch nao_kinect_teleop display.launch
    ```
 
 4. Start sending joint (skeleton) values from the Kinect v2 (in another
@@ -41,10 +40,9 @@ Teleoperate arms of a simulated NAO (with naoqi)
    naoqi --broker-ip 127.0.0.1
    ```
      
-2. Start ROS master, the NAO bridge and Rviz (each in a different terminal)
+2. Start ROS master, the NAO bridge and Rviz (in a different terminal)
    ```
    roslaunch nao_kinect_teleop nao_bringup.launch nao_ip:=127.0.0.1
-   roslaunch nao_kinect_teleop display.launch
    ```
 
 4. Start sending joint (skeleton) values from the Kinect v2 (in another

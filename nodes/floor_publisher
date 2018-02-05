@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+#
+# Publish a simple floor for visualization in rviz.
+#
+# The current floor has a blue color and is centered around the scene center
+# (with respect to the map frame)
+#
+
+import roslib
+import rospy
+
+from visualization_msgs.msg import Marker
+import geometry_msgs
+
+
+def publish_floor():
+
+   rospy.init_node('floor_publisher', anonymous=True)
+   publisher = rospy.Publisher('visualization_marker', Marker, queue_size=1)
+
+   # Floor size in meters
+   size = (2.0, 2.0, 0.1)
+   # Floor color (RGBA)
+   color = (0.1, 0.1, 0.44, 1.0)
+
+   marker = Marker()
+   marker.header.frame_id = "base_footprint"
+   marker.type = marker.CUBE
+   marker.action = marker.ADD
+
+   marker.scale.x = size[0]   # m
+   marker.scale.y = size[1]   # m
+   marker.scale.z = size[2]   # m
+
+   marker.color.r = color[0]
+   marker.color.g = color[1]
+   marker.color.b = color[2]
+   marker.color.a = color[3]
+
+   marker.pose.orientation.x = 0.0
+   marker.pose.orientation.y = 0.0
+   marker.pose.orientation.z = 0.0
+   marker.pose.orientation.w = 1.0
+   marker.pose.position.x = 0.0
+   marker.pose.position.y = 0.0
+   marker.pose.position.z = -size[2]/2.0
+
+   r = rospy.Rate(1)
+   while not rospy.is_shutdown():
+      publisher.publish(marker)
+      r.sleep()
+
+if __name__ == '__main__':
+   try:
+      publish_floor()
+   except rospy.ROSInterruptException:
+      pass

@@ -80,18 +80,22 @@ int main(int argc, char **argv)
   oscr::KineTask* taskre;
   oscr::KineTask* taskle;
   taskrh = new oscr::KineTaskPose(rmodel, mlink["r_gripper"], "position");
-  taskrh->setGain(30.0);
+  taskrh->setGain(200.0);
+  // taskrh->setWeight(1.0);
   tasklh = new oscr::KineTaskPose(rmodel, mlink["l_gripper"], "position");
-  tasklh->setGain(30.0);
+  tasklh->setGain(200.0);
+  // tasklh->setWeight(1.0);
   taskre = new oscr::KineTaskPose(rmodel, mlink["RElbow"], "position");
-  taskre->setGain(30.0);
+  taskre->setGain(200.0);
+  // taskre->setWeight(0.5);
   taskle = new oscr::KineTaskPose(rmodel, mlink["LElbow"], "position");
-  taskle->setGain(30.0);
+  taskle->setGain(200.0);
+  // taskle->setWeight(0.5);
 
   // Operational-Space Inverse Kinematics (OSIK) solver
   // --------------------------------------------------------------------
   // Sampling time
-  unsigned int f = 30;
+  unsigned int f = 200;
   double dt = static_cast<double>(1.0/f);
   // Solver (WQP, HQP or NS)
   oscr::OSIKSolverWQP solver(rmodel, qsensed, dt);

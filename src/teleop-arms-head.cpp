@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 
   // Ball markers for the human skeleton
   std::vector<BallMarker*> sk_bmarkers;
-  sk_bmarkers.resize(6);
+  sk_bmarkers.resize(9);
   for (unsigned int i=0; i<sk_bmarkers.size(); ++i)
     sk_bmarkers.at(i) = new BallMarker(nh, GREEN);
   // Line markers for the human skeleton
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
   // Ratio of the increment (the larger value, the lesser motion will be needed
   // for the head rotation)
   double dpitch = 4;
-  double dyaw = 5;
+  double dyaw = 4;
   double dx_sk_head = 0.0, dy_sk_head = 0.0;
   double qheadyaw = qsensed[0], qheadpitch = qsensed[1];
   double qheadyaw_prev = qheadyaw, qheadpitch_prev = qheadpitch;

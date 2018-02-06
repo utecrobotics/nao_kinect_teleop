@@ -54,6 +54,12 @@ TARGET_LINK_LIBRARIES(nao_teleop_arms_rviz ${ALL_LIBRARIES})
 # Executable to teleoperate the arms with Naoqi (and the real robot)
 ADD_EXECUTABLE(nao_teleop_arms src/teleop-arms.cpp)
 TARGET_LINK_LIBRARIES(nao_teleop_arms ${ALL_LIBRARIES})
- 
+
+# Executable to teleoperate arms and head with Naoqi (real robot) 
 ADD_EXECUTABLE(nao_teleop_arms_head src/teleop-arms-head.cpp)
 TARGET_LINK_LIBRARIES(nao_teleop_arms_head ${ALL_LIBRARIES})
+
+# Executable to teleoperate arms and head with Naoqi (real robot) 
+# It uses BodyArray2 (with orientations)
+ADD_EXECUTABLE(tmp src/teleop-arms-head-2.cpp)
+TARGET_LINK_LIBRARIES(tmp ${ALL_LIBRARIES})

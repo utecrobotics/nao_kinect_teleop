@@ -20,7 +20,6 @@
   -----------------------------------------
   Teleoperation of NAO using a Kinect v2
   This also moves the head joint
-  It uses BodyArray2 message
   -----------------------------------------
 */
 
@@ -30,7 +29,7 @@
 
 #include <oscr/oscr.hpp>
 
-#include <nao_kinect_teleop/kinect-arm-head-points.hpp>
+#include <nao_kinect_teleop/kinect-arm-points.hpp>
 #include <nao_kinect_teleop/nao-interface.hpp>
 #include <nao_kinect_teleop/markers.hpp>
 
@@ -55,7 +54,7 @@ int main(int argc, char **argv)
   qmin  = rmodel->jointMinAngularLimits();
   qmax  = rmodel->jointMaxAngularLimits();
   dqmax = rmodel->jointVelocityLimits();
-  
+
   // Initialize ROS
   ros::init(argc, argv, "nao_arms_teleop");
   ros::NodeHandle nh;
@@ -65,9 +64,9 @@ int main(int argc, char **argv)
   NaoInterface nao_interface(nh, rmodel->ndofActuated(), jnames);
 
   // Subscriber to the data of the Kinect v2
-  KinectArmHeadPoints kpoints;
-  ros::Subscriber sub_1 = nh.subscribe("kinect_points2", 1000,
-                                       &KinectArmHeadPoints::readKinectPoints,
+  KinectArmPoints kpoints;
+  ros::Subscriber sub_1 = nh.subscribe("kinect_points", 1000,
+                                       &KinectArmPoints::readKinectPoints,
                                        &kpoints);
 
   // Get the initial robot configuration (from the "joint_states" topic)
@@ -110,7 +109,7 @@ int main(int argc, char **argv)
 
   // Ball markers for the human skeleton
   std::vector<BallMarker*> sk_bmarkers;
-  sk_bmarkers.resize(7);
+  sk_bmarkers.resize(6);
   for (unsigned int i=0; i<sk_bmarkers.size(); ++i)
     sk_bmarkers.at(i) = new BallMarker(nh, GREEN);
   // Line markers for the human skeleton
@@ -131,7 +130,8 @@ int main(int argc, char **argv)
   Eigen::VectorXd p_lshoulder(3), p_lelbow(3), p_lwrist(3);
   Eigen::VectorXd sk_rshoulder(3), sk_relbow(3), sk_rwrist(3);
   Eigen::VectorXd sk_lshoulder(3), sk_lelbow(3), sk_lwrist(3);
-  Eigen::VectorXd sk_head(3), sk_head_prev(3);
+  Eigen::VectorXd sk_head(3), sk_neck(3), sk_torso(3);
+  Eigen::VectorXd sk_head_prev(3);
   // Vector for the desired joint configuration
   Eigen::VectorXd qdes;
   // Flag for the first execution
@@ -165,6 +165,8 @@ int main(int argc, char **argv)
       sk_lelbow    = kpoints.getPointPositionById(4);
       sk_lwrist    = kpoints.getPointPositionById(5);
       sk_head      = kpoints.getPointPositionById(6);
+      sk_neck      = kpoints.getPointPositionById(7);
+      sk_torso     = kpoints.getPointPositionById(8);
       // Show the ball markers corresponding to the human skeleton
       sk_bmarkers.at(0)->setPose(sk_rshoulder);
       sk_bmarkers.at(1)->setPose(sk_relbow);
@@ -173,6 +175,8 @@ int main(int argc, char **argv)
       sk_bmarkers.at(4)->setPose(sk_lelbow);
       sk_bmarkers.at(5)->setPose(sk_lwrist);
       sk_bmarkers.at(6)->setPose(sk_head);
+      sk_bmarkers.at(7)->setPose(sk_neck);
+      sk_bmarkers.at(8)->setPose(sk_torso);
       // Reset the line markers
       sk_lmarkers.reset();
       // Show the skeleton lines
@@ -181,9 +185,12 @@ int main(int argc, char **argv)
       sk_lmarkers.setPose(sk_lshoulder); sk_lmarkers.setPose(sk_lelbow);
       sk_lmarkers.setPose(sk_lelbow);    sk_lmarkers.setPose(sk_lwrist);
       sk_lmarkers.setPose(sk_rshoulder); sk_lmarkers.setPose(sk_lshoulder);
+      sk_lmarkers.setPose(sk_lshoulder); sk_lmarkers.setPose(sk_torso);
+      sk_lmarkers.setPose(sk_rshoulder); sk_lmarkers.setPose(sk_torso);
+      sk_lmarkers.setPose(sk_head);      sk_lmarkers.setPose(sk_neck);
       sk_lmarkers.publish();
 
-      // Only the very first time
+      // Store the very initial head position
       if (fl_first_time)
       {
         sk_head_prev = sk_head;
@@ -283,7 +290,7 @@ int main(int argc, char **argv)
       rmodel->updateJointConfig(qdes);
       // Send the command to NAO
       nao_interface.setJointPositionsCmd(qdes);
-     
+
       // Open or close the hands
       // if (false)
       // {

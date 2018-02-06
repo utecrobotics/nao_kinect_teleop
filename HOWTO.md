@@ -48,8 +48,11 @@ Ctrl+C; then press Ctrl+Z; then execute
 There should be a message saying: [Number]+ Terminated.
 
 
-Teleoperate arms and head of a simulated NAO (with naoqi)
+Teleoperate a simulated NAO (with naoqi)
 ================================================
+
+The following teleoperates the arms and head of the NAO (as in the previous case)
+but, instead of using the real robot, it uses the *simulation* provided by naoqi.
 
 1. Launch Naoqi locally
    ```

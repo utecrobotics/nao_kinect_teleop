@@ -110,14 +110,14 @@ int main(int argc, char **argv)
   std::vector<BallMarker*> sk_bmarkers;
   sk_bmarkers.resize(6);
   for (unsigned int i=0; i<sk_bmarkers.size(); ++i)
-    sk_bmarkers.at(i) = new BallMarker(nh, RED);
+    sk_bmarkers.at(i) = new BallMarker(nh, GREEN);
   // Line markers for the human skeleton
   LineMarker sk_lmarkers(nh, GREEN);
   // Ball markers for the retargeted (nao) skeleton
   std::vector<BallMarker*> nao_markers;
   nao_markers.resize(6);
   for (unsigned int i=0; i<nao_markers.size(); ++i)
-    nao_markers.at(i) = new BallMarker(nh, GREEN);
+    nao_markers.at(i) = new BallMarker(nh, LIGHTGRAY, 0.9, 0.03);
 
   // Nao lengths
   double Lnao_upperarm = 0.108;  // From shoulder to elbow

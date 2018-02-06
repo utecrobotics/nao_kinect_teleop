@@ -37,15 +37,17 @@ Teleoperate arms and head of the real NAO
    rosservice call /body_stiffness/disable 
    rosservice call /body_stiffness/disable 
    ```
-Then stop all the previous processes (using Ctrl+C in each terminal). There
+Then stop all the previous processes (using ``Ctrl+C`` in each terminal). There
 is currently an issue with thread running the kinect process and it needs to
 be manually killed. To this end, go to the terminal used in step 4 and press
-Ctrl+C; then press Ctrl+Z; then execute
+``Ctrl+C``; then press ``Ctrl+Z``; then execute
    ```
    kill %
    jobs
    ```
 There should be a message saying: [Number]+ Terminated.
+
+**Note:** If you are using *Terminator* as a terminal emulator, you can split the terminal horizontally using ``CTRL+O``, and vertically using ``CTRL+E``. This is useful for the previous case since each command must be in its dedicated terminal.
 
 
 Teleoperate a simulated NAO (with naoqi)
@@ -77,6 +79,6 @@ but, instead of using the real robot, it uses the *simulation* provided by naoqi
    rosrun nao_kinect_teleop nao_teleop_arms_head
    ```
 **Ending the motion**: To end the motionstop all the previous processes 
-(using Ctrl+C in each terminal). There is currently an issue with thread
+(using ``Ctrl+C`` in each terminal). There is currently an issue with thread
 running the kinect process and it needs to be manually killed as mentioned
 before.

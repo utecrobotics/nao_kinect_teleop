@@ -8,11 +8,11 @@ using the motion shown by a person.
 
 ### Installation
 
-For instructions about installation, see the INSTALL.md file
+For instructions about installation, see the [INSTALL.md](INSTALL.md) file
 
 ### Usage
 
-For instructions about the usage of the teleoperation, see the HOWTO.md file
+For instructions about the usage of the teleoperation, see the [HOWTO.md](HOWTO.md) file
 
 ### Dependencies
 

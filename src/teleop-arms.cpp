@@ -118,6 +118,8 @@ int main(int argc, char **argv)
   nao_markers.resize(6);
   for (unsigned int i=0; i<nao_markers.size(); ++i)
     nao_markers.at(i) = new BallMarker(nh, LIGHTGRAY, 0.9, 0.03);
+  // Line markers for the retargeted (NAO) skeleton
+  LineMarker nao_lmarkers(nh, LIGHTGRAY);
 
   // Nao lengths
   double Lnao_upperarm = 0.108;  // From shoulder to elbow
@@ -210,6 +212,14 @@ int main(int argc, char **argv)
       nao_markers.at(3)->setPose(p_lelbow);
       nao_markers.at(4)->setPose(p_lwrist);
       nao_markers.at(5)->setPose(p_lshoulder);
+      // Reset the NAO markers
+      nao_lmarkers.reset();
+      // NAO lines
+      nao_lmarkers.setPose(p_rshoulder); nao_lmarkers.setPose(p_relbow);
+      nao_lmarkers.setPose(p_relbow);    nao_lmarkers.setPose(p_rwrist);
+      nao_lmarkers.setPose(p_lshoulder); nao_lmarkers.setPose(p_lelbow);
+      nao_lmarkers.setPose(p_lelbow);    nao_lmarkers.setPose(p_lwrist);
+      nao_lmarkers.publish();
 
       // Set the desired positions for the tasks
       taskre->setDesiredValue(p_relbow);

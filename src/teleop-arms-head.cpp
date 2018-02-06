@@ -138,7 +138,7 @@ int main(int argc, char **argv)
   bool fl_first_time = true;
   // Ratio of the increment (the larger value, the lesser motion will be needed
   // for the head rotation)
-  double dpitch = 4;
+  double dpitch = 2;
   double dyaw = 4;
   double dx_sk_head = 0.0, dy_sk_head = 0.0;
   double qheadyaw = qsensed[0], qheadpitch = qsensed[1];

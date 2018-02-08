@@ -1,16 +1,16 @@
-#ifndef _NAO_KTELEOP_KINECT_ARM_POINTS_HPP_
-#define _NAO_KTELEOP_KINECT_ARM_POINTS_HPP_
+#ifndef _NAO_KTELEOP_KINECT_SKELETON_FIXED_HPP_
+#define _NAO_KTELEOP_KINECT_SKELETON_FIXED_HPP_
 
 
 #include <Eigen/Dense>
 #include <kinect_msgs/SkeletonFixedOrder.h>
 
 
-class KinectArmPoints
+class KinectSkeletonFixed
 {
 public:
 
-  KinectArmPoints();
+  KinectSkeletonFixed();
 
   void readKinectPoints(const kinect_msgs::SkeletonFixedOrder::ConstPtr& msg);
 

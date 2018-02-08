@@ -29,7 +29,7 @@
 
 #include <oscr/oscr.hpp>
 
-#include <nao_kinect_teleop/kinect-arm-points.hpp>
+#include <nao_kinect_teleop/kinect-skeleton-fixed.hpp>
 #include <nao_kinect_teleop/nao-interface.hpp>
 #include <nao_kinect_teleop/markers.hpp>
 
@@ -64,9 +64,9 @@ int main(int argc, char **argv)
   NaoInterface nao_interface(nh, rmodel->ndofActuated(), jnames);
 
   // Subscriber to the data of the Kinect v2
-  KinectArmPoints kpoints;
+  KinectSkeletonFixed kpoints;
   ros::Subscriber sub_1 = nh.subscribe("kinect_points", 1000,
-                                       &KinectArmPoints::readKinectPoints,
+                                       &KinectSkeletonFixed::readKinectPoints,
                                        &kpoints);
 
   // Get the initial robot configuration (from the "joint_states" topic)

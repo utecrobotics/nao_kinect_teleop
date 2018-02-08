@@ -32,7 +32,7 @@
 
 #include <nao_kinect_teleop/joint-state-pub.hpp>
 #include <nao_kinect_teleop/markers.hpp>
-#include <nao_kinect_teleop/kinect-arm-points.hpp>
+#include <nao_kinect_teleop/kinect-skeleton-fixed.hpp>
 
 
 int main(int argc, char **argv)
@@ -68,9 +68,9 @@ int main(int argc, char **argv)
   JointStatePub jstate_pub(nh, robot->ndof(), has_floating_base);
   jstate_pub.setJointNames(jnames);
   // * Subscriber to kinect messages
-  KinectArmPoints kpoints;
+  KinectSkeletonFixed kpoints;
   ros::Subscriber sub = nh.subscribe("kinect_points", 1000,
-                                     &KinectArmPoints::readKinectPoints,
+                                     &KinectSkeletonFixed::readKinectPoints,
                                      &kpoints);
 
   // Assign the initial joint configuration

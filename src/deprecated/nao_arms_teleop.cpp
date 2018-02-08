@@ -33,7 +33,7 @@
 
 #include <nao_kinect_teleop/deprecated/robotSpecifics.h>
 #include <nao_kinect_teleop/deprecated/tools.hpp>
-#include <nao_kinect_teleop/kinect-arm-points.hpp>
+#include <nao_kinect_teleop/kinect-skeleton-fixed.hpp>
 
 
 int main(int argc, char **argv)
@@ -65,11 +65,11 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "nao_arms_teleop");
   ros::NodeHandle nh;
 
-  KinectArmPoints kpoints;
+  KinectSkeletonFixed kpoints;
   //Suscriber
   ros::Subscriber sub_1 = nh.subscribe("kinect_points",
                                        1000,
-                                       &KinectArmPoints::readKinectPoints,
+                                       &KinectSkeletonFixed::readKinectPoints,
                                        &kpoints);
   //Publisher
   ros::Publisher pub

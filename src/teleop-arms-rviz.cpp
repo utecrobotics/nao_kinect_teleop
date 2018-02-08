@@ -145,7 +145,7 @@ int main(int argc, char **argv)
   ros::Rate rate(f); // Hz
   while(ros::ok())
   {
-    unsigned int n_kinect_points = kpoints.getPoints()->body.size();
+    unsigned int n_kinect_points = kpoints.getPoints()->position.size();
 
     // Only work when there are skeleton points from the Kinect
     if (n_kinect_points > 0)

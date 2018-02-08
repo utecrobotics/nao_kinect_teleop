@@ -18,7 +18,7 @@
  * -------------------------------------------------------------------------
  *
  * Teleoperation of NAO arms and head with a Kinect v2 using Naoqi (either
- * the "real robot" or a simulated "naoqi robot". 
+ * the "real robot" or a simulated "naoqi robot".
  * It uses the BodyArray2 message
  *
  * -------------------------------------------------------------------------
@@ -30,7 +30,7 @@
 
 #include <oscr/oscr.hpp>
 
-#include <nao_kinect_teleop/kinect-arm-head-points.hpp>
+#include <nao_kinect_teleop/kinect-arm-points.hpp>
 #include <nao_kinect_teleop/nao-interface.hpp>
 #include <nao_kinect_teleop/markers.hpp>
 
@@ -65,9 +65,9 @@ int main(int argc, char **argv)
   NaoInterface nao_interface(nh, rmodel->ndofActuated(), jnames);
 
   // Subscriber to the data of the Kinect v2
-  KinectArmHeadPoints kpoints;
+  KinectArmPoints kpoints;
   ros::Subscriber sub_1 = nh.subscribe("kinect_points2", 1000,
-                                       &KinectArmHeadPoints::readKinectPoints,
+                                       &KinectArmPoints::readKinectPoints,
                                        &kpoints);
 
   // Get the initial robot configuration (from the "joint_states" topic)
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 
   while(ros::ok())
   {
-    unsigned int n_kinect_points = kpoints.getPoints()->body.size();
+    unsigned int n_kinect_points = kpoints.getPoints()->position.size();
 
     // Only work when there are skeleton points from the Kinect
     if (n_kinect_points > 0)

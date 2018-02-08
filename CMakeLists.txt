@@ -32,7 +32,6 @@ ADD_LIBRARY(nao_kinect_teleop SHARED
   src/utils/kinect-arm-points.cpp
   src/utils/nao-interface.cpp
   src/utils/joint-state-pub.cpp
-  src/utils/kinect-arm-head-points.cpp
   )
 
 SET(ALL_LIBRARIES
@@ -55,11 +54,11 @@ TARGET_LINK_LIBRARIES(nao_teleop_arms_rviz ${ALL_LIBRARIES})
 ADD_EXECUTABLE(nao_teleop_arms src/teleop-arms.cpp)
 TARGET_LINK_LIBRARIES(nao_teleop_arms ${ALL_LIBRARIES})
 
-# Executable to teleoperate arms and head with Naoqi (real robot) 
+# Executable to teleoperate arms and head with Naoqi (real robot)
 ADD_EXECUTABLE(nao_teleop_arms_head src/teleop-arms-head.cpp)
 TARGET_LINK_LIBRARIES(nao_teleop_arms_head ${ALL_LIBRARIES})
 
-# Executable to teleoperate arms and head with Naoqi (real robot) 
+# Executable to teleoperate arms and head with Naoqi (real robot)
 # It uses BodyArray2 (with orientations)
 ADD_EXECUTABLE(tmp src/teleop-arms-head-2.cpp)
 TARGET_LINK_LIBRARIES(tmp ${ALL_LIBRARIES})

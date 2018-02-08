@@ -34,7 +34,6 @@
 #include <nao_kinect_teleop/deprecated/robotSpecifics.h>
 #include <nao_kinect_teleop/deprecated/tools.hpp>
 #include <nao_kinect_teleop/kinect-arm-points.hpp>
-#include <kinect_msgs/BodyArray.h>
 
 
 int main(int argc, char **argv)
@@ -168,7 +167,7 @@ int main(int argc, char **argv)
   //#######################################################
   while(ros::ok())
   {
-    unsigned int n_kinect_points = kpoints.getPoints()->body.size();
+    unsigned int n_kinect_points = kpoints.getPoints()->position.size();
 
     // Only work when there are skeleton points from the Kinect
     if (n_kinect_points > 0)

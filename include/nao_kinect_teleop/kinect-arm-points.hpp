@@ -3,7 +3,7 @@
 
 
 #include <Eigen/Dense>
-#include <kinect_msgs/BodyArray.h>
+#include <kinect_msgs/SkeletonFixedOrder.h>
 
 
 class KinectArmPoints
@@ -12,14 +12,14 @@ public:
 
   KinectArmPoints();
 
-  void readKinectPoints(const kinect_msgs::BodyArray::ConstPtr& msg);
+  void readKinectPoints(const kinect_msgs::SkeletonFixedOrder::ConstPtr& msg);
 
-  kinect_msgs::BodyArray::ConstPtr getPoints();
+  kinect_msgs::SkeletonFixedOrder::ConstPtr getPoints();
 
   Eigen::Vector3d getPointPositionById(const unsigned int& id);
 
 private:
-  kinect_msgs::BodyArray::ConstPtr msg_;
+  kinect_msgs::SkeletonFixedOrder::ConstPtr msg_;
   Eigen::Vector3d position_;
 
 };

@@ -14,14 +14,14 @@
  * GNU Lesser General Public License for more details. You should
  * have received a copy of the GNU Lesser General Public License along
  * with nao_kinect_teleop. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*
-  -----------------------------------------
-  Teleoperation of NAO using a Kinect v2
-  This also moves the head joint
-  It uses BodyArray2 message
-  -----------------------------------------
+ *
+ * -------------------------------------------------------------------------
+ *
+ * Teleoperation of NAO arms and head with a Kinect v2 using Naoqi (either
+ * the "real robot" or a simulated "naoqi robot". 
+ * It uses the BodyArray2 message
+ *
+ * -------------------------------------------------------------------------
 */
 
 

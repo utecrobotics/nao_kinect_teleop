@@ -263,7 +263,7 @@ int main(int argc, char **argv)
       dx_sk_head = sk_head(0) - sk_head_prev(0);
       dy_sk_head = sk_head(1) - sk_head_prev(1);
       // Head motion in y (lateral) wil correspond to the head yaw
-      qheadyaw   += dy_sk_head*dyaw;
+      qheadyaw   -= dy_sk_head*dyaw;
       // Head motion in x (forward/backward) will correspond to the head pitch
       qheadpitch += dx_sk_head*dpitch;
       // Check for the limits

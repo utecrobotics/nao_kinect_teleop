@@ -69,7 +69,7 @@ int main(int argc, char **argv)
   jstate_pub.setJointNames(jnames);
   // * Subscriber to kinect messages
   KinectSkeletonFixed kpoints;
-  ros::Subscriber sub = nh.subscribe("kinect_points", 1000,
+  ros::Subscriber sub = nh.subscribe("kinect_skeleton", 1000,
                                      &KinectSkeletonFixed::readKinectPoints,
                                      &kpoints);
 

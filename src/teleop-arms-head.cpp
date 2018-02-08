@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
   // Subscriber to the data of the Kinect v2
   KinectSkeletonFixed kpoints;
-  ros::Subscriber sub_1 = nh.subscribe("kinect_points", 1000,
+  ros::Subscriber sub_1 = nh.subscribe("kinect_skeleton", 1000,
                                        &KinectSkeletonFixed::readKinectPoints,
                                        &kpoints);
 

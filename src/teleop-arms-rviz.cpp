@@ -14,6 +14,13 @@
  * GNU Lesser General Public License for more details. You should
  * have received a copy of the GNU Lesser General Public License along
  * with nao_kinect_teleop. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * -------------------------------------------------------------------------
+ *
+ * Teleoperation of NAO arms with a Kinect v2 using only the kinematic model
+ * in RViz (there is no interaction with naoqi).
+ *
+ * -------------------------------------------------------------------------
  */
 
 

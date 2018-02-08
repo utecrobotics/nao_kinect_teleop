@@ -39,7 +39,7 @@ Teleoperate arms and head of the real NAO
    ```
 Then stop all the previous processes (using ``Ctrl+C`` in each terminal). There
 is currently an issue with thread running the kinect process and it needs to
-be manually killed. To this end, go to the terminal used in step 4 and press
+be manually killed. To this end, go to the terminal used in step 3 and press
 ``Ctrl+C``; then press ``Ctrl+Z``; then execute
    ```
    kill %

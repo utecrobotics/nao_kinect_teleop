@@ -14,13 +14,14 @@
  * GNU Lesser General Public License for more details. You should
  * have received a copy of the GNU Lesser General Public License along
  * with nao_kinect_teleop. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * -------------------------------------------------------------------------
+ *
+ * Teleoperation of NAO arms with a Kinect v2 using Naoqi (either the "real
+ * robot" or a simulated "naoqi robot"
+ *
+ * -------------------------------------------------------------------------
  */
-
-/*
-  -----------------------------------------
-  Teleoperation of NAO using a Kinect v2
-  -----------------------------------------
-*/
 
 
 #include <ros/ros.h>

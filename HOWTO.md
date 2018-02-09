@@ -17,7 +17,7 @@ Teleoperate arms and head of the real NAO
    acces to the NiTE features:
    ```
    roscd kinect_v2
-   rosrun kinect_v2 mainBodyArray
+   rosrun kinect_v2 pubSkeletonFixed
    ```
 
 5. Wait until the skeleton is properly detected. Then enable the robot motors
@@ -70,7 +70,7 @@ but, instead of using the real robot, it uses the *simulation* provided by naoqi
    terminal)
    ```
    roscd kinect_v2
-   rosrun kinect_v2 mainBodyArray
+   rosrun kinect_v2 pubSkeletonFixed
    ```
 
 5. Wait until the skeleton is properly detected. Then start the NAO motion
